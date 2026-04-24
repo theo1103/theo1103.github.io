@@ -1,0 +1,8 @@
+.btn-compiler {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    border: none;
+    color: white;
+    border-radius: 25px;
+    padding: 8px 20px;
+    transition: transform 0.3s;
+}

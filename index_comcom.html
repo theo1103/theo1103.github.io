@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Excel Matcher Pro</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<style>/*! min */body{background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh}.card{border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.2);border:none}.card-header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:15px 15px 0 0}.btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:25px}.btn-reset{background:linear-gradient(135deg,#ff9966,#ff5e62);border:none;border-radius:25px;color:white}.btn-logout{background:linear-gradient(135deg,#f093fb,#f5576c);border:none;border-radius:25px}.btn-compiler{background:linear-gradient(135deg,#43e97b,#38f9d7);border:none;border-radius:25px}.btn-dropdown{background:linear-gradient(135deg,#fa709a,#fee140);border:none;border-radius:25px}.preview-table{max-height:400px;overflow:auto;font-size:12px}.preview-table th{background:#667eea;color:#fff;position:sticky;top:0}.login-container{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;z-index:2000}.login-card{background:#fff;border-radius:20px;padding:40px;width:400px;box-shadow:0 20px 40px rgba(0,0,0,0.3)}.main-content{display:none}.user-info{display:flex;justify-content:flex-end;gap:15px;margin-bottom:20px;flex-wrap:wrap}.loading{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000}.result-stats{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:10px;padding:15px}.stat-number{font-size:24px;font-weight:bold}</style>
+</head>
+<body>
+<div id="L0" class="login-container"><div class="login-card"><h2 class="text-center"><i class="fas fa-file-excel"></i> Excel Matcher</h2><form id="L1"><div class="mb-3"><label class="form-label">Username</label><input type="text" id="L2" class="form-control" required></div><div class="mb-3"><label class="form-label">Password</label><input type="password" id="L3" class="form-control" required></div><div id="L4" class="alert alert-danger" style="display:none"></div><button type="submit" class="btn btn-primary w-100">Login</button></form><div class="text-center mt-3"><small>demo: admin / admin123</small></div></div></div>
+<div id="M0" class="main-content"><div class="container py-4"><div class="user-info"><span id="M1"></span><div class="dropdown"><button class="btn btn-dropdown dropdown-toggle btn-sm" data-bs-toggle="dropdown"><i class="fas fa-external-link-alt"></i> Links</button><ul class="dropdown-menu dropdown-menu-custom"><li><a class="dropdown-item" data-x="https://1057-sg.teleows.com/portal-web/portal/homepage.html"><i class="fas fa-globe"></i> OWS</a></li><li><a class="dropdown-item" data-x="https://1057-sg.teleows.com/adc-static/static/procodeComp/1057/netdrone_maps_v3/netdrone_maps_v4/netdrone_maps_v4/latest/dist/index.html#/"><i class="fas fa-drone"></i> Netdrone</a></li><li><a class="dropdown-item" data-x="https://www.notion.so/List-Pass-cb228e32ba7249afb7e2bfe41a011096?source=copy_link"><i class="fas fa-notebook"></i> My Notion</a></li></ul></div><a href="Index_compiler.html" class="btn btn-compiler btn-sm" target="_blank"><i class="fas fa-code"></i> Compiler</a><button id="resetBtn" class="btn btn-reset btn-sm"><i class="fas fa-trash-alt"></i> Reset</button><button id="M2" class="btn btn-logout btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</button></div><div class="text-center mb-4"><h1 class="text-white">Excel Data Matcher</h1><p class="text-white-50">Cocokkan data & reset cache dengan tombol Reset</p></div><div class="card"><div class="card-header">Konfigurasi</div><div class="card-body"><div class="row"><div class="col-md-6 mb-3"><label class="fw-bold">File 1 (DB Utama)</label><input type="file" id="F1" class="form-control" accept=".xlsx,.xls"><div id="I1" class="file-info mt-2" style="display:none"><i class="fas fa-check-circle text-success"></i> <span id="N1"></span><br><small id="D1"></small></div></div><div class="col-md-6 mb-3"><label class="fw-bold">File 2 (Pembanding)</label><input type="file" id="F2" class="form-control" accept=".xlsx,.xls"><div id="I2" class="file-info mt-2" style="display:none"><i class="fas fa-check-circle text-success"></i> <span id="N2"></span><br><small id="D2"></small></div></div></div><hr><div class="row"><div class="col-md-4 mb-3"><label>Kolom Target File 1</label><select id="C1" class="form-select" disabled><option value="">-- Pilih --</option></select></div><div class="col-md-4 mb-3"><label>Kolom Target File 2</label><select id="C2" class="form-select" disabled><option value="">-- Pilih --</option></select></div><div class="col-md-4 mb-3"><label>Baris Target (opsional)</label><input type="number" id="R1" class="form-control" placeholder="Kosongkan semua"></div></div><div class="mb-3"><label>Nama kolom validasi</label><input type="text" id="V1" class="form-control" value="Validasi"></div><div class="row"><div class="col-md-6"><h6>Preview File 1</h6><div id="P1" class="preview-table"></div></div><div class="col-md-6"><h6>Preview File 2</h6><div id="P2" class="preview-table"></div></div></div><div class="text-center mt-3"><button id="B1" class="btn btn-primary btn-lg" disabled>Proses</button><button id="B2" class="btn btn-success btn-lg" style="display:none">Download</button></div></div></div><div id="RC" style="display:none"><div class="card mt-3"><div class="card-header">Hasil</div><div class="card-body"><div id="RS" class="result-stats"></div><div id="RP" class="preview-table mt-3"></div></div></div></div></div></div>
+<div id="load" class="loading"><div class="spinner-border text-light" style="width:3rem;height:3rem"></div><p class="text-white mt-2">Memproses...</p></div>
+<script>
+(function(){
+    // --- credentials & session ---
+    let S=sessionStorage, U='excel_matcher_logged', W='excel_matcher_user';
+    let creds={admin:'admin123',user:'user123'};
+    let f1Data=null,f2Data=null,f1H=[],f2H=[],procData=null,procH=[];
+    
+    function login(u,p){if(creds[u]&&creds[u]===p){S.setItem(U,'true');S.setItem(W,u);showMain(u);return true} return false;}
+    function logout(){S.removeItem(U);S.removeItem(W);resetAll();document.getElementById('L0').style.display='flex';document.getElementById('M0').style.display='none';}
+    function showMain(u){document.getElementById('L0').style.display='none';document.getElementById('M0').style.display='block';document.getElementById('M1').innerHTML='<i class="fas fa-user-circle"></i> '+u;}
+    
+    // reset total aplikasi (data, preview, hasil, file input, cache state)
+    function resetAll(){
+        f1Data=null; f2Data=null; f1H=[]; f2H=[]; procData=null; procH=[];
+        // reset file inputs
+        let file1=document.getElementById('F1'); let file2=document.getElementById('F2');
+        file1.value=''; file2.value='';
+        // hide info
+        document.getElementById('I1').style.display='none'; document.getElementById('I2').style.display='none';
+        document.getElementById('N1').innerText=''; document.getElementById('N2').innerText='';
+        document.getElementById('D1').innerText=''; document.getElementById('D2').innerText='';
+        // reset dropdowns
+        let c1=document.getElementById('C1'); let c2=document.getElementById('C2');
+        c1.innerHTML='<option value="">-- Pilih --</option>'; c2.innerHTML='<option value="">-- Pilih --</option>';
+        c1.disabled=true; c2.disabled=true;
+        document.getElementById('R1').value='';
+        document.getElementById('V1').value='Validasi';
+        // clear preview
+        document.getElementById('P1').innerHTML=''; document.getElementById('P2').innerHTML='';
+        document.getElementById('RC').style.display='none';
+        document.getElementById('B1').disabled=true;
+        document.getElementById('B2').style.display='none';
+        // bersihkan juga hasil stat
+        document.getElementById('RS').innerHTML='';
+        document.getElementById('RP').innerHTML='';
+    }
+    
+    // fungsi tambahan untuk reset + refresh visual (memanggil resetAll, lalu memberikan notifikasi)
+    function fullReset(){
+        resetAll();
+        // tampilkan pesan toast sederhana
+        let toast=document.createElement('div');
+        toast.className='alert alert-warning position-fixed bottom-0 end-0 m-3';
+        toast.style.zIndex='9999';
+        toast.innerHTML='<i class="fas fa-broom"></i> Semua data & cache telah dibersihkan';
+        document.body.appendChild(toast);
+        setTimeout(()=>toast.remove(),2000);
+    }
+    
+    // baca excel
+    function readExcel(file){return new Promise((res,rej)=>{let r=new FileReader();r.onload=e=>{let wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}),sh=wb.Sheets[wb.SheetNames[0]],json=XLSX.utils.sheet_to_json(sh,{defval:""});if(!json.length)rej('File kosong');let h=Object.keys(json[0]),rows=json.map(r=>h.map(c=>r[c]||""));res({headers:h,data:rows})};r.onerror=()=>rej('Gagal baca');r.readAsArrayBuffer(file)});}
+    function updCol(sel,hd){sel.innerHTML='<option value="">-- Pilih --</option>';hd.forEach(h=>{let o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o)});sel.disabled=false;}
+    function preview(cont,data,hd){let c=document.getElementById(cont);if(!data||!data.length){c.innerHTML='<p class="text-muted">Tidak ada data</p>';return}let html='<div style="overflow-x:auto"><table class="table table-sm table-bordered"><thead><tr>';hd.forEach(h=>html+=`<th>${escapeHtml(h)}</th>`);html+='</tr></thead><tbody>';data.slice(0,10).forEach(row=>{html+='<tr>';row.forEach(cell=>html+=`<td>${escapeHtml(String(cell))}</table>`);html+='</tr>'});html+='</tbody></table>';if(data.length>10)html+=`<p class="text-muted">10 dari ${data.length} baris</p>`;html+='</div>';c.innerHTML=html;}
+    function escapeHtml(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+    function checkReady(){document.getElementById('B1').disabled=!(f1Data&&f2Data&&document.getElementById('C1').value&&document.getElementById('C2').value);}
+    
+    function processMatch(){
+        let col1=document.getElementById('C1').value,col2=document.getElementById('C2').value,valCol=document.getElementById('V1').value||'Validasi',rowT=document.getElementById('R1').value;rowT=rowT===''?null:parseInt(rowT);
+        if(rowT!==null&&(rowT<0||rowT>=f1Data.length)){alert(`Baris 0..${f1Data.length-1}`);return}
+        let idx1=f1H.indexOf(col1),idx2=f2H.indexOf(col2);if(idx1==-1||idx2==-1){alert('Kolom tidak ditemukan');return}
+        document.getElementById('load').style.display='block';document.getElementById('B1').disabled=true;
+        setTimeout(()=>{
+            try{
+                procH=[...f1H,valCol];procData=[];let match=0,unmatch=0,set2=new Set(f2Data.map(r=>String(r[idx2]).trim()));
+                if(rowT!==null){let v=String(f1Data[rowT][idx1]).trim();if(set2.has(v)){procData.push([...f1Data[rowT],'NOT OK']);match++}else{procData.push([...f1Data[rowT],'OK']);unmatch++}}
+                else{for(let i=0;i<f1Data.length;i++){let v=String(f1Data[i][idx1]).trim();if(set2.has(v)){procData.push([...f1Data[i],'NOT OK']);match++}else{procData.push([...f1Data[i],'OK']);unmatch++}}}
+                document.getElementById('RS').innerHTML=statsHtml(match,unmatch,rowT);preview('RP',procData,procH);document.getElementById('B2').style.display='inline-block';document.getElementById('RC').style.display='block';
+            }catch(e){alert('Error: '+e.message)}finally{document.getElementById('load').style.display='none';document.getElementById('B1').disabled=false}
+        },50);
+    }
+    function statsHtml(m,u,r){let t=m+u;return `<div class="row text-center"><div class="col-md-4"><div class="stat-number">${t}</div><div>Total</div></div><div class="col-md-4"><div class="stat-number" style="color:#ffeb3b">${m}</div><div>MATCH <span class="badge bg-danger">NOT OK</span></div></div><div class="col-md-4"><div class="stat-number" style="color:#a5d6a7">${u}</div><div>TIDAK MATCH <span class="badge bg-success">OK</span></div></div>${r!==null?`<div class="col-12 mt-3"><div class="alert alert-info">Baris target: ${r}</div></div>`:''}</div>`;}
+    function downloadResult(){if(!procData||!procH){alert('Tidak ada data');return}let ws=XLSX.utils.aoa_to_sheet([procH,...procData]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Hasil');XLSX.writeFile(wb,`hasil_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.xlsx`);let t=document.createElement('div');t.className='alert alert-success position-fixed bottom-0 end-0 m-3';t.innerHTML='<i class="fas fa-check-circle"></i> Berhasil diunduh';document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+    
+    // event listeners
+    document.getElementById('L1').addEventListener('submit',e=>{e.preventDefault();let u=document.getElementById('L2').value.trim(),p=document.getElementById('L3').value,err=document.getElementById('L4');if(login(u,p)){err.style.display='none';}else{err.innerText='Salah!';err.style.display='block';}});
+    document.getElementById('M2').addEventListener('click',logout);
+    document.getElementById('resetBtn').addEventListener('click',fullReset);
+    
+    document.getElementById('F1').addEventListener('change',async e=>{let f=e.target.files[0];if(f){document.getElementById('N1').innerText=f.name;document.getElementById('I1').style.display='block';try{let d=await readExcel(f);f1Data=d.data;f1H=d.headers;document.getElementById('D1').innerText=`${f1Data.length} baris, ${f1H.length} kolom`;updCol(document.getElementById('C1'),f1H);preview('P1',f1Data,f1H);checkReady()}catch(err){alert('Gagal baca file 1')}}});
+    document.getElementById('F2').addEventListener('change',async e=>{let f=e.target.files[0];if(f){document.getElementById('N2').innerText=f.name;document.getElementById('I2').style.display='block';try{let d=await readExcel(f);f2Data=d.data;f2H=d.headers;document.getElementById('D2').innerText=`${f2Data.length} baris, ${f2H.length} kolom`;updCol(document.getElementById('C2'),f2H);preview('P2',f2Data,f2H);checkReady()}catch(err){alert('Gagal baca file 2')}}});
+    document.getElementById('B1').addEventListener('click',processMatch);
+    document.getElementById('B2').addEventListener('click',downloadResult);
+    document.getElementById('C1').addEventListener('change',checkReady);
+    document.getElementById('C2').addEventListener('change',checkReady);
+    document.querySelectorAll('.dropdown-item[data-x]').forEach(el=>{el.addEventListener('click',e=>{e.preventDefault();let url=el.getAttribute('data-x');if(url) window.open(url,'_blank');})});
+    
+    if(S.getItem(U)==='true'){showMain(S.getItem(W)||'User');}else{document.getElementById('L0').style.display='flex';document.getElementById('M0').style.display='none';}
+})();
+</script>
+</body>
+</html>

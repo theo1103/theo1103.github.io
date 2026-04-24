@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo Punya 🔄</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+    <div class="max-w-4xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-sky-400 mb-6 text-center">🔄 Compiler Theo</h1>
+
+        <!-- UPLOAD AREA -->
+        <div class="bg-slate-800 p-6 rounded-lg mb-6 border border-slate-700">
+            <div class="mb-4">
+                <label class="block text-sm text-slate-400 mb-2">Pilih File Excelnya bre</label>
+                <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv" class="block w-full text-sm text-slate-400
+                    file:mr-4 file:py-2 file:px-4 file:rounded file:border-0
+                    file:text-sm file:font-semibold file:bg-sky-600 file:text-white
+                    hover:file:bg-sky-500">
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="mergeExcel()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-sm font-medium">Gabung File</button>
+                <button onclick="clearFiles()" class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded text-sm">Hapus Semua</button>
+            </div>
+
+            <div id="fileList" class="mt-4 text-sm text-slate-400"></div>
+        </div>
+
+        <!-- LOADING -->
+        <div id="loading" class="hidden text-center py-6">
+            <div class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.937l3-2.646z"></path>
+                </svg>
+                <span>Sedang menggabungkan file...</span>
+            </div>
+        </div>
+
+        <!-- LOG -->
+        <div id="log" class="text-xs text-slate-500 mt-4 text-center"></div>
+    </div>
+
+    <script>
+        let files = [];
+        let mergedData = [];
+
+        // Tampilkan file yang dipilih
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            files = Array.from(e.target.files);
+            updateFileList();
+        });
+
+        function updateFileList() {
+            const list = document.getElementById('fileList');
+            list.innerHTML = files.map(f => 
+                `<div class="text-sm text-slate-300">✅ ${f.name}</div>`
+            ).join('');
+        }
+
+        function clearFiles() {
+            document.getElementById('fileInput').value = '';
+            files = [];
+            document.getElementById('fileList').innerHTML = '';
+            log('');
+        }
+
+        async function mergeExcel() {
+            if (files.length === 0) {
+                log('Pilih file dulu!');
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            log('Mulai gabung file...');
+            mergedData = [];
+            let header = null;
+
+            try {
+                for (const file of files) {
+                    const data = await file.arrayBuffer();
+                    const wb = XLSX.read(data, {type: 'array'});
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(ws, {header: 1});
+
+                    if (!header && json.length > 0) {
+                        header = json[0];
+                        mergedData.push(header);
+                    }
+
+                    const startRow = header ? 1 : 0;
+                    mergedData.push(...json.slice(startRow));
+
+                    log(`✅ ${file.name} (${json.length} baris)`);
+                }
+
+                document.getElementById('loading').classList.add('hidden');
+                log(`Selesai! Total ${mergedData.length - 1} baris. Klik tombol di bawah untuk download.`);
+                downloadExcel();
+            } catch (e) {
+                document.getElementById('loading').classList.add('hidden');
+                log(`Error: ${e.message}`);
+            }
+        }
+
+        function downloadExcel() {
+            if (mergedData.length === 0) {
+                log('Tidak ada data untuk di-download');
+                return;
+            }
+
+            try {
+                const ws = XLSX.utils.json_to_sheet(mergedData, {skipHeader: true});
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Merged');
+                XLSX.writeFile(wb, 'Hasil_Gabung.xlsx');
+                log('Download dimulai...');
+            } catch (e) {
+                log(`Error: ${e.message}`);
+            }
+        }
+
+        function log(msg) {
+            document.getElementById('log').innerHTML = 
+                `<span class="text-xs">${new Date().toLocaleTimeString()} - ${msg}</span>`;
+        }
+    </script>
+</body>
+</html>
